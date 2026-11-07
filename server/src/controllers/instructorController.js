@@ -86,29 +86,17 @@ export async function searchInstructors(req, res, next) {
 
     const filter = {};
 
-    // Ensure parameters are strictly primitive strings to completely block operator injection ($ne, $regex, etc.)
-    if (req.query.name !== undefined) {
-      if (typeof req.query.name === 'string') {
-        filter.name = { $regex: req.query.name, $options: 'i' };
-      } else {
-        return res.status(400).json({ message: 'Invalid name parameter format' });
-      }
+    // Safely apply filters only if they are primitive strings (ignoring operator injection objects instead of throwing 400)
+    if (req.query.name !== undefined && typeof req.query.name === 'string') {
+      filter.name = { $regex: req.query.name, $options: 'i' };
     }
 
-    if (req.query.department !== undefined) {
-      if (typeof req.query.department === 'string') {
-        filter.department = req.query.department;
-      } else {
-        return res.status(400).json({ message: 'Invalid department parameter format' });
-      }
+    if (req.query.department !== undefined && typeof req.query.department === 'string') {
+      filter.department = req.query.department;
     }
 
-    if (req.query.role !== undefined) {
-      if (typeof req.query.role === 'string') {
-        filter.role = req.query.role;
-      } else {
-        return res.status(400).json({ message: 'Invalid role parameter format' });
-      }
+    if (req.query.role !== undefined && typeof req.query.role === 'string') {
+      filter.role = req.query.role;
     }
 
     const instructors = await Instructor.find(filter)
